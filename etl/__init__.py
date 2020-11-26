@@ -6,3 +6,4 @@ from .user import open_server_users
 from .engage import open_server_engage
 from .payment import open_server_payment
 from .battle import open_server_battle
+from .resource import open_server_resource

@@ -20,4 +20,4 @@ class ETLConfig:
     BATTLE_FIELDS = ['uid','date_id','pvp','fastpvp','gather_o + gather_r gather']
 
     # always include uid and date_id
-    RESOURCE_FIELDS = ['uid','date_id','city_leve','mojo']
+    RESOURCE_FIELDS = ['uid','date_id','city_level','mojo']

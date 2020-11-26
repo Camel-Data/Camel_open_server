@@ -45,7 +45,7 @@ def open_server_engage(server_ids = [123,234], days = 10, server_open = None,
                         .moreq('date_id', after_date)\
                         .make()
 
-            tool = Dbtools.initialize('all','aoz')
+            tool = Dbtools.initialize('all',game)
             conn = tool.get_connection(**tool.get_conn_info(server_id,'gs'))
             df = pd.read_sql_query(sql, conn)
             df['from_server'] = server_id
