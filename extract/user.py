@@ -13,7 +13,7 @@ from tqdm import tqdm
 
 
 def open_server_users(server_ids = [123,234], days = 10, server_open = None,
-                    fields = None, game = 'aoz', offset = 0):
+                    fields = None, game = 'aoz', offset = 0, **kwargs):
 
     '''
         This function queries user_info for all users registered within `days` days

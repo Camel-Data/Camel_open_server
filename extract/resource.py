@@ -11,8 +11,8 @@ import logging
 from tqdm import tqdm
 
 
-def open_server_battle(server_ids = [123,234], days = 10, server_open = None,
-                    fields = None, game = 'aoz', offset = 0):
+def open_server_resource(server_ids = [123,234], days = 10, server_open = None,
+                    fields = None, game = 'aoz', offset = 0, **kwargs):
 
     # default parameters
     if isinstance(server_ids, int):
@@ -22,18 +22,18 @@ def open_server_battle(server_ids = [123,234], days = 10, server_open = None,
         server_open =server_open_nd(game = game,days = days, offset = offset)
 
     if fields is None:
-        fields = ['uid','date_id','pvp','fastpvp','gather_o + gather_r gather']
+        fields = ['uid','date_id','city_level','mojo']
 
     # table
-    table = 'operate_battle_log'
+    table = 'operate_res_log'
 
     # parsers
     parsers = {'date_id':'date'}
 
     dfs = []
-    pbar = tqdm(server_ids, desc = 'Battle: ')
+    pbar = tqdm(server_ids, desc = 'Resource: ')
     for server_id in pbar:
-        pbar.set_description('Battle {}'.format(server_id))
+        pbar.set_description('Resource {}'.format(server_id))
         try:
             tool = Dbtools.initialize('all',game)
             before_date = server_open.loc[server_id,f'open_{days}_date_id']
@@ -51,7 +51,7 @@ def open_server_battle(server_ids = [123,234], days = 10, server_open = None,
             df['from_server'] = server_id
             dfs.append(df)
         except Exception as e:
-            logging.error('Unable to get engagement on server {}'.format(server_id))
+            logging.error('Unable to get resource on server {}'.format(server_id))
             print(e)
 
     dfs = pd.concat(dfs, sort = False)

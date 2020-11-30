@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 
 def open_server_engage(server_ids = [123,234], days = 10, server_open = None,
-                    fields = None, game = 'aoz', offset = 0):
+                    fields = None, game = 'aoz', offset = 0, **kwargs):
 
     # default parameters
     if isinstance(server_ids, int):
