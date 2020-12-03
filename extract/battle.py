@@ -3,6 +3,7 @@ from camel_utils_x.camel_sql import SQLBase
 from camel_queries.datafile_config import all_paths, show_catalog
 
 from .utils import rename_aggr, server_open_nd
+from data_utils import with_day_id
 
 from datetime import datetime, timedelta
 import pandas as pd
@@ -10,7 +11,7 @@ import pandas as pd
 import logging
 from tqdm import tqdm
 
-
+@with_day_id()
 def open_server_battle(server_ids = [123,234], days = 10, server_open = None,
                     fields = None, game = 'aoz', offset = 0, **kwargs):
 

@@ -1,7 +1,7 @@
 from dbx import Dbtools
 from camel_utils_x.camel_sql import SQLBase
 from camel_queries.datafile_config import all_paths, show_catalog
-
+from data_utils import with_day_id
 from .utils import rename_aggr, server_open_nd
 
 from datetime import datetime, timedelta
@@ -10,7 +10,7 @@ import pandas as pd
 import logging
 from tqdm import tqdm
 
-
+@with_day_id()
 def open_server_payment(server_ids = [123,234], days = 10, server_open = None,
                     fields = None, game = 'aoz', offset = 0, **kwargs):
 
@@ -57,6 +57,7 @@ def open_server_payment(server_ids = [123,234], days = 10, server_open = None,
 
     dfs = pd.concat(dfs, sort = False)
     dfs.columns = rename_aggr(dfs.columns, aggr = 'from_unixtime')
-    dfs.rename(columns = {'create_time':'date'}, inplace = True)
+    # dfs.rename(columns = {'create_time':'date'}, inplace = True)
+    dfs['date'] = pd.to_datetime(dfs.create_time.dt.date)
 
     return dfs

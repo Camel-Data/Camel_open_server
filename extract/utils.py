@@ -4,7 +4,7 @@ from datetime import timedelta
 import pandas as pd
 
 
-def server_open_nd(game = 'aoz', days = 10, offset = 0):
+def server_open_nd(game = 'aoz', days = 10, offset = 0, *arg, **kwargs):
     '''
         When query data that between server open data and n days after server open
         You need to know server open date
