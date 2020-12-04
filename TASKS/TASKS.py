@@ -26,4 +26,17 @@ PAYMENT_TASKS = (
     (['from_server','day_id'],  [],              ['amount'], [np.median],0),
 )
 
+PAYMENT_TO_DAILY = (
+    #  group by index          # columns         # calc val   # method  # missing fill
+    (['from_server','day_id','user_id'],[],                      ['amount'], [np.sum],0),
+    (['from_server','day_id','user_id'],['type'],                ['amount'], [np.sum],0),
+    (['from_server','day_id','user_id'],[],                      ['amount'], ['count'],0),
+    (['from_server','day_id','user_id'],['type'],                ['amount'], ['count'],0),
+)
 
+
+PAYMENT_TO_DAILY_SIMPLE = (
+    #  group by index          # columns         # calc val   # method  # missing fill
+    (['from_server','day_id','user_id'],[],                      ['amount'], [np.sum],0),
+    (['from_server','day_id','user_id'],[],                      ['amount'], ['count'],0),
+)
