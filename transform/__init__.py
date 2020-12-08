@@ -1,1 +1,1 @@
-from .goldfarmer import gold_farmer_aggr
+from .goldfarmer import goldfarmer_transform

@@ -7,6 +7,7 @@ from .utils import rename_aggr, server_open_nd
 
 from datetime import datetime, timedelta
 import pandas as pd
+import re
 
 import logging
 from tqdm import tqdm
@@ -108,6 +109,11 @@ def open_server_users(server_ids = [123,234], days = 10, server_open = None,
 
     dfs = dfs.merge(utypes, on = ['user_id','from_server'], how = 'left')
     dfs.user_type = dfs.user_type.fillna('Missing')
+
+    if 'device_model' in dfs.columns:
+        dfs['device_model'] = ['IOS' if re.search(r".*iphone.*",dm, re.IGNORECASE) \
+                                else "ANDROID"  \
+                                for dm in dfs['device_model']]
 
 
     return dfs

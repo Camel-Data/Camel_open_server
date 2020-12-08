@@ -72,7 +72,7 @@ class ETLConfig:
     # merge attk and def on [atk_id, date] <--> [def_id, date], method = 'outer'
     # then you get aggregated features of each user, each day
 
-    ATTK_GROUPBY = ['atk_id','date']
+    ATTK_GROUPBY = ['from_server','atk_id','date']
 
     ATTK_LAST = ['atk_ip','atk_name','atk_device_id','atk_user_lvl',
     'atk_city_lvl','atk_alli_id','atk_alli_full', 'atk_alli_short',
@@ -83,7 +83,7 @@ class ETLConfig:
     ATTK_COUNT = ['id']
 
 
-    DEF_GROUPBY = ['def_id','date']
+    DEF_GROUPBY = ['from_server','def_id','date']
 
     DEF_LAST = ['def_ip','def_name','def_device_id','def_user_lvl',
     'def_city_lvl','def_alli_id','def_alli_full', 'def_alli_short',

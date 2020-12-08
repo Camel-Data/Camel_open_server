@@ -3,3 +3,4 @@ __pycache__
 db_info
 snippets
 debug.log
+.pytest_cache
