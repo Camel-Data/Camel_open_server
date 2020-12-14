@@ -2,6 +2,12 @@ import pandas as pd
 import numpy as np
 from functools import wraps
 from functools import reduce
+import inspect
+import logging
+from collections.abc import Container, Iterable, Sequence
+from dbx import Dbtools
+from datetime import timedelta
+
 
 def add_day_id(df, group_col = 'from_server', date_col = 'date',
                 id_offset = 0, day_id_name = 'day_id'):
@@ -32,6 +38,7 @@ def with_day_id(*oargs, **okwargs):
             return add_day_id(df,*oargs,**okwargs)
         return wrapper
     return decorator
+
 
 
 def piv(df, task):
@@ -112,6 +119,52 @@ def run_aggregation_tasks(df, tasks, merge = False):
     if merge:
         return reduce(lambda x,y:x.merge(y, left_index = True, right_index = True, how = 'left'), dfs)
     return dfs
+
+
+def asfreq_by_group(df, group_col = 'user_id', date_col = 'date', fixed_last_day = None):
+
+    # get minimm date of a user, and maximum
+    first = df.groupby('user_id')['date'].min().reset_index()
+
+    if not fixed_last_day:
+        last = df.groupby('user_id')['date'].max().reset_index()
+
+    # if you want to end at specific day
+    else:
+        last = first.copy()
+
+        if isinstance(fixed_last_day, str):
+            try:
+                fixed_last_day = datetime.strptime(fixed_last_day,'%Y-%m-%d')
+            except Exception as e:
+                print('Bad datetime format for `fixed_last_day`')
+                raise ValueError('Bad datetime format for `fixed_last_day`')
+
+        last['date'] = fixed_last_day
+
+
+    first = first.rename(columns = {'date':'first_date'})
+    last = last.rename(columns = {'date':'last_date'})
+
+    user_dates = first.merge(last, on = ['user_id'], how = 'left')
+
+
+    user_dates = user_dates.loc[user_dates.first_date <= user_dates.last_date,:]
+
+
+    # why use a loop: get faster speed
+    results = []
+    for user, s, e in user_dates.values:
+        cur_date = s
+        while s<= e:
+            results.append([user,s])
+            s += timedelta(days = 1)
+    filled = pd.DataFrame(results, columns = ['user_id','date'])
+
+    filled = filled.merge(df, on = ['user_id','date'], how = 'left').ffill()
+
+    return filled
+
 
 
 

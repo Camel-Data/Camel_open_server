@@ -45,6 +45,9 @@ def open_server_users(server_ids = [123,234], days = 10, server_open = None,
         ```
 
     '''
+
+    tool = Dbtools.initialize('all',game)
+
     # default parameters
     if isinstance(server_ids, int):
         server_ids = [server_ids]
@@ -65,7 +68,7 @@ def open_server_users(server_ids = [123,234], days = 10, server_open = None,
 
     dfs = []
 
-    tool = Dbtools.initialize('all',game)
+
 
     pbar = tqdm(server_ids, desc = 'UserInfo: ')
 

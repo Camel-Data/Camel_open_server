@@ -15,6 +15,8 @@ from tqdm import tqdm
 def open_server_battle(server_ids = [123,234], days = 10, server_open = None,
                     fields = None, game = 'aoz', offset = 0, **kwargs):
 
+    tool = Dbtools.initialize('all',game)
+
     # default parameters
     if isinstance(server_ids, int):
         server_ids = [server_ids]
@@ -36,7 +38,7 @@ def open_server_battle(server_ids = [123,234], days = 10, server_open = None,
     for server_id in pbar:
         pbar.set_description('Battle {}'.format(server_id))
         try:
-            tool = Dbtools.initialize('all',game)
+
             before_date = server_open.loc[server_id,f'open_{days}_date_id']
             after_date = server_open.loc[server_id,'open_date_id']
 
