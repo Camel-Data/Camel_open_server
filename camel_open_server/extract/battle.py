@@ -1,8 +1,10 @@
 from dbx import Dbtools
 from camel_utils_x.camel_sql import SQLBase
 from camel_queries.datafile_config import all_paths, show_catalog
-from data_utils import with_day_id
+
 from .utils import rename_aggr, server_open_nd
+
+from ..data_utils import with_day_id
 
 from datetime import datetime, timedelta
 import pandas as pd
@@ -11,7 +13,7 @@ import logging
 from tqdm import tqdm
 
 @with_day_id()
-def open_server_engage(server_ids = [123,234], days = 10, server_open = None,
+def open_server_battle(server_ids = [123,234], days = 10, server_open = None,
                     fields = None, game = 'aoz', offset = 0, **kwargs):
 
     tool = Dbtools.initialize('all',game)
@@ -24,18 +26,18 @@ def open_server_engage(server_ids = [123,234], days = 10, server_open = None,
         server_open =server_open_nd(game = game,days = days, offset = offset)
 
     if fields is None:
-        fields = ['uid','date_id','chat_num','active_time']
+        fields = ['uid','date_id','pvp','fastpvp','gather_o + gather_r gather']
 
     # table
-    table = 'operation_cheater_monitor'
+    table = 'operate_battle_log'
 
     # parsers
     parsers = {'date_id':'date'}
 
     dfs = []
-    pbar = tqdm(server_ids, desc = 'Engagement: ')
+    pbar = tqdm(server_ids, desc = 'Battle: ')
     for server_id in pbar:
-        pbar.set_description('Engagement {}'.format(server_id))
+        pbar.set_description('Battle {}'.format(server_id))
         try:
 
             before_date = server_open.loc[server_id,f'open_{days}_date_id']
@@ -53,7 +55,7 @@ def open_server_engage(server_ids = [123,234], days = 10, server_open = None,
             df['from_server'] = server_id
             dfs.append(df)
         except Exception as e:
-            logging.error('Unable to get engagement on server {}'.format(server_id))
+            logging.error('Unable to get battle on server {}'.format(server_id))
             print(e)
 
     dfs = pd.concat(dfs, sort = False)

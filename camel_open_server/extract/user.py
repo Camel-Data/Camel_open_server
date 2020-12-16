@@ -2,7 +2,7 @@ from dbx import Dbtools
 from camel_utils_x.camel_sql import SQLBase
 from camel_queries.datafile_config import all_paths, show_catalog
 from user_type_x import user_type_core
-from data_utils import with_day_id
+from ..data_utils import with_day_id
 from .utils import rename_aggr, server_open_nd
 
 from datetime import datetime, timedelta

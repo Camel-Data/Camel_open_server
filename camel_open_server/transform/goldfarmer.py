@@ -1,7 +1,7 @@
 from functools import reduce
 import pandas as pd
-from config import config_list
-from data_utils import with_day_id
+from ..config import config_list
+from ..data_utils import with_day_id
 
 def attacker_user_daily(goldfarmer, etl_config = config_list['ETLConfig']):
     '''Daily user behavior as attacker'''

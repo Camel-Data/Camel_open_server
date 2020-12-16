@@ -1,7 +1,7 @@
 from dbx import Dbtools
 from camel_utils_x.camel_sql import SQLBase
 from camel_queries.datafile_config import all_paths, show_catalog
-from data_utils import with_day_id
+from ..data_utils import with_day_id
 from .utils import rename_aggr, server_open_nd
 
 from datetime import datetime, timedelta
@@ -11,8 +11,9 @@ import logging
 from tqdm import tqdm
 
 @with_day_id()
-def open_server_resource(server_ids = [123,234], days = 10, server_open = None,
+def open_server_troop(server_ids = [123,234], days = 10, server_open = None,
                     fields = None, game = 'aoz', offset = 0, **kwargs):
+
 
     tool = Dbtools.initialize('all',game)
 
@@ -24,18 +25,19 @@ def open_server_resource(server_ids = [123,234], days = 10, server_open = None,
         server_open =server_open_nd(game = game,days = days, offset = offset)
 
     if fields is None:
-        fields = ['uid','date_id','city_level','mojo']
+        fields = ['uid','date_id','losePower, raisePower',
+                        'loseTroop','addTroop','woundTroop','alliance_id']
 
     # table
-    table = 'operate_res_log'
+    table = 'operate_troop_log'
 
     # parsers
     parsers = {'date_id':'date'}
 
     dfs = []
-    pbar = tqdm(server_ids, desc = 'Resource: ')
+    pbar = tqdm(server_ids, desc = 'Troop: ')
     for server_id in pbar:
-        pbar.set_description('Resource {}'.format(server_id))
+        pbar.set_description('Troop {}'.format(server_id))
         try:
 
             before_date = server_open.loc[server_id,f'open_{days}_date_id']
@@ -53,7 +55,7 @@ def open_server_resource(server_ids = [123,234], days = 10, server_open = None,
             df['from_server'] = server_id
             dfs.append(df)
         except Exception as e:
-            logging.error('Unable to get resource on server {}'.format(server_id))
+            logging.error('Unable to get troop on server {}'.format(server_id))
             print(e)
 
     dfs = pd.concat(dfs, sort = False)

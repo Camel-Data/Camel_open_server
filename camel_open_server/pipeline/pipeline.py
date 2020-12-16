@@ -1,15 +1,20 @@
-from extract import open_server_users
-from extract import open_server_engage
-from extract import open_server_payment
-from extract import open_server_battle
-from extract import open_server_resource
-from extract import open_server_troop
-from extract import server_open_nd
-from extract import open_server_goldfarmer
-from transform import goldfarmer_transform
-from config import ETLConfig
-import TASKS as TASKS
-from data_utils import run_aggregation_tasks, asfreq_by_group
+import sys
+sys.path.append('../')
+
+from ..extract import open_server_users
+from ..extract import open_server_engage
+from ..extract import open_server_payment
+from ..extract import open_server_battle
+from ..extract import open_server_resource
+from ..extract import open_server_troop
+from ..extract import server_open_nd
+from ..extract import open_server_goldfarmer
+from ..transform import goldfarmer_transform
+from ..config import ETLConfig
+from .. import TASKS as TASKS
+from ..data_utils import run_aggregation_tasks, asfreq_by_group
+
+
 import numpy as np
 import pandas as pd
 from functools import reduce

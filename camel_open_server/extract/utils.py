@@ -36,6 +36,9 @@ def server_open_nd(game = 'aoz', days = 10, offset = 0, *arg, **kwargs):
     # YYYYMMDD open dateid
     server_open['open_date_id'] = server_open.open_time.dt.strftime('%Y%m%d')
 
+    server_open['open_date_id'] = server_open['open_date_id'].astype(int)
+    server_open[f'open_{days}_date_id'] = server_open[f'open_{days}_date_id'].astype(int)
+
     return server_open
 
 

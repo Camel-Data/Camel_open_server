@@ -1,9 +1,8 @@
 from dbx import Dbtools
 from camel_utils_x.camel_sql import SQLBase
 from camel_queries.datafile_config import all_paths, show_catalog
-
+from ..data_utils import with_day_id
 from .utils import rename_aggr, server_open_nd
-from data_utils import with_day_id
 
 from datetime import datetime, timedelta
 import pandas as pd
@@ -12,7 +11,7 @@ import logging
 from tqdm import tqdm
 
 @with_day_id()
-def open_server_battle(server_ids = [123,234], days = 10, server_open = None,
+def open_server_payment(server_ids = [123,234], days = 10, server_open = None,
                     fields = None, game = 'aoz', offset = 0, **kwargs):
 
     tool = Dbtools.initialize('all',game)
@@ -25,28 +24,28 @@ def open_server_battle(server_ids = [123,234], days = 10, server_open = None,
         server_open =server_open_nd(game = game,days = days, offset = offset)
 
     if fields is None:
-        fields = ['uid','date_id','pvp','fastpvp','gather_o + gather_r gather']
+        fields = ['user_id','create_time','currency_ammount']
 
     # table
-    table = 'operate_battle_log'
+    table = 'payment_record'
 
     # parsers
-    parsers = {'date_id':'date'}
+    parsers = {'create_time':'stamp13'}
+
+    alias = {'currency_ammount':'amount'}
 
     dfs = []
-    pbar = tqdm(server_ids, desc = 'Battle: ')
+    pbar = tqdm(server_ids, desc = 'Payment: ')
     for server_id in pbar:
-        pbar.set_description('Battle {}'.format(server_id))
+        pbar.set_description('Payment {}'.format(server_id))
         try:
-
-            before_date = server_open.loc[server_id,f'open_{days}_date_id']
-            after_date = server_open.loc[server_id,'open_date_id']
+            before_date = server_open.loc[server_id,f'open_{days}_date']
+            after_date = server_open.loc[server_id, 'open_time']
 
             sql = SQLBase(fields = fields, table = table,
-                          parsers = parsers)\
-                        .less('date_id',before_date)\
-                        .moreq('date_id', after_date)\
-                        .make()
+                          parsers = parsers, alias = alias)\
+                        .stamp13before('create_time',before_date)\
+                        .stamp13after('create_time',after_date).make()
 
             tool = Dbtools.initialize('all',game)
             conn = tool.get_connection(**tool.get_conn_info(server_id,'gs'))
@@ -54,11 +53,12 @@ def open_server_battle(server_ids = [123,234], days = 10, server_open = None,
             df['from_server'] = server_id
             dfs.append(df)
         except Exception as e:
-            logging.error('Unable to get battle on server {}'.format(server_id))
+            logging.error('Unable to get payment on server {}'.format(server_id))
             print(e)
 
     dfs = pd.concat(dfs, sort = False)
-    dfs.columns = rename_aggr(dfs.columns, aggr = 'date')
-    dfs.rename(columns = {'uid':'user_id','date_id':'date'}, inplace = True)
+    dfs.columns = rename_aggr(dfs.columns, aggr = 'from_unixtime')
+    # dfs.rename(columns = {'create_time':'date'}, inplace = True)
+    dfs['date'] = pd.to_datetime(dfs.create_time.dt.date)
 
     return dfs
