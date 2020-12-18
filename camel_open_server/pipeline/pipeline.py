@@ -19,6 +19,7 @@ import numpy as np
 import pandas as pd
 from functools import reduce
 from datetime import datetime, timedelta
+import logging
 
 # this is just a default parameter
 task_config = dict(game = 'aoz',server_ids = [234,235,236],
@@ -68,49 +69,72 @@ def gen_city_level_features(resource):
     return run_aggregation_tasks(city_level, TASKS.CITYLEVEL_TASK, merge = True)
 
 
-def feature_generation(task_config = task_config, etl_config = ETLConfig):
+def feature_generation(task_config = task_config, etl_config = ETLConfig, exclude = None):
 
     # query server open date
     task_config['server_open'] = server_open_nd(**task_config)
 
-    # query user info
-    user = open_server_users(**task_config, fields = etl_config.USER_INFO_FIELDS)
+    feature_list = []
 
-    # query engage
-    engage = open_server_engage(**task_config, fields = etl_config.ENGAGE_FIELDS)
+    try:
+        # query user info
+        user = open_server_users(**task_config, fields = etl_config.USER_INFO_FIELDS)
+        # aggregate to serve - day level
+        user_features = run_aggregation_tasks(user, TASKS.USER_TASKS,merge = True)
+        user_features = user_features.rename(columns = {'user_id_count':'register_count'})
+        feature_list.append(user_features)
+    except Exception as e:
+        logging.error('Unable to get user feature on server')
+        print(e)
+        return None
 
-    # query engage, convert to each user 1 record pey day
-    payment = open_server_payment(**task_config, fields = etl_config.PAYMENT_FIELDS)
-    payment =run_aggregation_tasks(payment, TASKS.PAYMENT_TO_DAILY,merge= True).reset_index()
+    try:
+        # query engage
+        engage = open_server_engage(**task_config, fields = etl_config.ENGAGE_FIELDS)
+        engage_features = run_aggregation_tasks(engage, TASKS.ENGAGE_TASKS, merge = True)
+        feature_list.append(engage_features)
+    except:
+        logging.error('Unable to get engage feature on server')
 
-    # query battle
-    battle = open_server_battle(**task_config, fields = etl_config.BATTLE_FIELDS)
+    try:
+        # query engage, convert to each user 1 record pey day
+        payment = open_server_payment(**task_config, fields = etl_config.PAYMENT_FIELDS)
+        payment =run_aggregation_tasks(payment, TASKS.PAYMENT_TO_DAILY,merge= True).reset_index()
+        payment_features = run_aggregation_tasks(payment, TASKS.PAYMENT_TASKS, merge = True)
+        feature_list.append(payment_features)
+    except:
+        logging.error('Unable to get payment feature on server')
 
-    # query resource
-    resource = open_server_resource(**task_config, fields = etl_config.RESOURCE_FIELDS)
+    try:
+        # query battle
+        battle = open_server_battle(**task_config, fields = etl_config.BATTLE_FIELDS)
+        battle_features = run_aggregation_tasks(battle, TASKS.BATTLE_TASK, merge = True)
+        battle_features = battle_features.rename(columns = {'user_id_count':'battle_count'})
+    except:
+        logging.error('Unable to get battle feature on server')
 
-    # query troop
-    troop = open_server_troop(**task_config,fields = etl_config.TROOP_FIELDS)
+    try:
+        # query resource
+        resource = open_server_resource(**task_config, fields = etl_config.RESOURCE_FIELDS)
+        resource_features = run_aggregation_tasks(resource, TASKS.RESOURCE_TASK,merge = True)
+        feature_list.append(resource_features)
+        city_level_features = gen_city_level_features(resource)
+        feature_list.append(city_level_features)
+    except:
+        logging.error('Unable to get resource and citylevel feature')
 
-    # query goldfarmer, convert to each user 1 record per day
-    goldfarmer = open_server_goldfarmer(**task_config, fields = etl_config.GOLD_FARMER_FIELDS)
-    goldfarmer = goldfarmer_transform(goldfarmer, etl_config)
+    try:
+        # query troop
+        troop = open_server_troop(**task_config,fields = etl_config.TROOP_FIELDS)
+        troop_features = run_aggregation_tasks(troop, TASKS.TROOP_TASK, merge = True)
+        feature_list.append(troop_features)
+    except:
+        logging.error('Unable to get troop features')
 
-    # aggregate to serve - day level
-    user_features = run_aggregation_tasks(user, TASKS.USER_TASKS,merge = True)
-    user_features = user_features.rename(columns = {'user_id_count':'register_count'})
+    # try:
+    #     # query goldfarmer, convert to each user 1 record per day
+    #     goldfarmer = open_server_goldfarmer(**task_config, fields = etl_config.GOLD_FARMER_FIELDS)
+    #     goldfarmer = goldfarmer_transform(goldfarmer, etl_config)
 
-    engage_features = run_aggregation_tasks(engage, TASKS.ENGAGE_TASKS, merge = True)
-
-    battle_features = run_aggregation_tasks(battle, TASKS.BATTLE_TASK, merge = True)
-    battle_features = battle_features.rename(columns = {'user_id_count':'battle_count'})
-
-    troop_features = run_aggregation_tasks(troop, TASKS.TROOP_TASK, merge = True)
-
-    resource_features = run_aggregation_tasks(resource, TASKS.RESOURCE_TASK,merge = True)
-
-    city_level_features = gen_city_level_features(resource)
-
-    feature_list = [user_features, engage_features, battle_features, troop_features, resource_features, city_level_features]
 
     return reduce(lambda left, right: left.merge(right, left_index = True, right_index = True), feature_list)

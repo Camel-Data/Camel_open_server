@@ -4,3 +4,6 @@ db_info
 snippets
 debug.log
 .pytest_cache
+build
+dist
+*.egg-info

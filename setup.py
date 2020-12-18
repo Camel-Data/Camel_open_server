@@ -2,7 +2,7 @@ from setuptools import setup
 from setuptools import find_packages
 
 setup(name='camel_open_server',
-      version='0.0.1',
+      version='0.0.5',
       description='Query and analyze open server data',
       author='The fastest man alive.',
       packages=find_packages(),

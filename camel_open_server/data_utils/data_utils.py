@@ -67,7 +67,7 @@ def groupby(df, task):
     if vals == '*':
         vals = [s for s in df.columns if s not in ['from_server','day_id','user_id','date']]
 
-    df = df.groupby(ind)[vals].agg(methods)
+    df = df.groupby(ind)[vals].agg(methods).fillna(na)
     df.columns = [f'{field}_{method}'for field, method in df.columns]
     return df
 

@@ -119,12 +119,13 @@ def payed_user_count_nd(server_ids = None, game = None, days = 30):
 def device_count_nd(server_ids = None, game = None, days = 30):
     game = game if game else 'aoz'
     tool = Dbtools.initialize('all',game)
+    days = days + 1
     server_ids = server_ids if server_ids else sorted(list(tool.game_servers_parsed.keys()))
     server_open = server_open_nd(game, days = days, offset = 0)
 
-    fields = ['distinct uid']
+    fields = ['distinct device_id']
     table = 'operate_device_log'
-    parsers = { 'distinct uid':'count'}
+    parsers = { 'distinct device_id':'count'}
     alias = ['device_count']
 
     dfs = []
@@ -143,7 +144,7 @@ def device_count_nd(server_ids = None, game = None, days = 30):
         sql = SQLBase(fields = fields, table = table,
               parsers = parsers,
               alias = alias).\
-        lesseq('date_id', before_date).make()
+        less('date_id', before_date).make()
 
         result = pd.read_sql_query(sql, connection)
         result['from_server'] = server_id

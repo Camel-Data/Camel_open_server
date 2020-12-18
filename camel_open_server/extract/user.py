@@ -105,18 +105,25 @@ def open_server_users(server_ids = [123,234], days = 10, server_open = None,
             logging.info('Determine user type on server {}'.format(server_id))
             utypes.append(user_type_core(game, server_id))
 
+
         except:
             logging.warning('Unable to determin user type on server {}'.format(server_id))
 
-    utypes = pd.concat(utypes,sort = False)
 
-    dfs = dfs.merge(utypes, on = ['user_id','from_server'], how = 'left')
-    dfs.user_type = dfs.user_type.fillna('Missing')
+    try:
+        utypes = pd.concat(utypes,sort = False)
+        dfs = dfs.merge(utypes, on = ['user_id','from_server'], how = 'left')
+        dfs['user_type'] = dfs.user_type.fillna('Missing')
+    except:
+        dfs['user_type'] = 'Missing'
 
-    if 'device_model' in dfs.columns:
-        dfs['device_model'] = ['IOS' if re.search(r".*iphone.*",dm, re.IGNORECASE) \
-                                else "ANDROID"  \
-                                for dm in dfs['device_model']]
+    try:
+        if 'device_model' in dfs.columns:
+            dfs['device_model'] = ['IOS' if re.search(r".*iphone.*",str(dm), re.IGNORECASE) \
+                                    else "ANDROID"  \
+                                    for dm in dfs['device_model']]
+    except:
+        dfs['device_model'] = 'Missing'
 
 
     return dfs
